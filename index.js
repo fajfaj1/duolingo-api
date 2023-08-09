@@ -24,20 +24,47 @@ app.get('/', (req, res) => {
     res.send(JSON.stringify({ message: 'Hello World!', availableRoutes: ['/profile/info?username', '/profile/screenshot'] }));
 });
 
-
-// Profile route
-app.get('/profile/info', async (req, res) => {
-    const receiveTime = Date.now();
-
-    const profile = await scraper.fetchProfile(req.query.username);
+async function fetchProfile(username, optimize) {
+    const profile = await scraper.fetchProfile(username, optimize);
     const profileData = await profile.getProfileData();
 
     const response = {
-        responseTime: `${Date.now() - receiveTime}ms`,
         timestamp: Date.now(),
         body: profileData
     }
 
+    return response
+}
+
+// Profile route
+app.get('/profile/info', async (req, res) => {
+    const receiveTime = Date.now();
+    const username = req.query.username
+
+    let response
+    const cachedProfiles = await db.get('cachedProfiles')
+    let cachedProfile = cachedProfiles[username]
+
+    if(!cachedProfile) cachedProfile = {timestamp: 0}
+
+    const timeSince = Date.now() - cachedProfile.timestamp
+
+    if(timeSince > 3.6e+6 || !cachedProfile.body) {
+
+        console.log(`Fetching profile... ${timeSince > 3.6e+6} ${!cachedProfile.body}`)
+        response = await fetchProfile(username, true);
+        cachedProfile[username] = response
+        await db.set('cachedProfiles', cachedProfile)
+
+    } else {
+
+        console.log('Using cached profile...')
+        response = cachedProfile
+        
+    }
+
+    response.responseTime = `${Date.now() - receiveTime}ms`;  
+  
     res.send(JSON.stringify(response));
 })
 // Profile screenshot route
