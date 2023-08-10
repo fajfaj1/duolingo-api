@@ -38,13 +38,22 @@ export default async function scraper() {
             // Navigate the page to a URL
             const rawDuolingoProfileUrl = `https://www.duolingo.com/profile/${username}`;
             const duolingoProfileUrl = encodeURI(rawDuolingoProfileUrl);
-            await page.goto(duolingoProfileUrl);
-            if(page.url() === 'https://www.duolingo.com/errors/404.html') { 
-                reject({
-                    status: 'error',
-                    message: 'User not found'
-                }) 
-            }
+            page.goto(duolingoProfileUrl, { waitUntil: 'networkidle2' });
+            // log('Navigated', `Navigated to ${duolingoProfileUrl}`, 'success')
+            
+            // Check if the user exists
+            // page.on('request', (req) => {
+            //     if(req.url() === 'https://www.duolingo.com/errors/404.html') {
+            //         log('User not found', `User ${username} not found`, 'warn')
+            //         resolve({
+            //             status: 'error',
+            //             message: 'User not found'
+            //         }) 
+            //         page.close()
+            //     }
+            // })
+            
+            // Wait for the good packet to steal
             page.on('response', async (res) => {
                 const regex = /^https:\/\/www\.duolingo\.com\/\d{4}-\d{2}-\d{2}\/users\?username=/g
                 if (`${res.url()}`.match(regex)) {
@@ -64,6 +73,12 @@ export default async function scraper() {
             })
 
             function responseToData(response) {
+                if(response.users.length === 0) {
+                    return {
+                        status: 'error',
+                        message: 'User not found'
+                    }
+                }
                 const profile = response.users[0]
 
                 const props = ['name', 'totalXp', 'username', 'courses', 'streak', 'currentCourseId', 'createionDate', 'streakData', 'hasPlus']
