@@ -25,8 +25,7 @@ app.get('/', (req, res) => {
 });
 
 async function fetchProfile(username, optimize) {
-    const profile = await scraper.fetchProfile(username, optimize);
-    const profileData = await profile.getProfileData();
+    const profileData = await scraper.fetchProfile(username, optimize);    
 
     const response = {
         timestamp: Date.now(),
@@ -42,7 +41,8 @@ app.get('/profile/info', async (req, res) => {
     const username = req.query.username
 
     let response
-    const cachedProfiles = await db.get('cachedProfiles')
+    let cachedProfiles = await db.get('cachedProfiles')
+    if(!cachedProfiles) cachedProfiles = {}
     let cachedProfile = cachedProfiles[username]
 
     if(!cachedProfile) cachedProfile = {timestamp: 0}
