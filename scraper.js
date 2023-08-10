@@ -1,21 +1,19 @@
 import puppeteer from 'puppeteer';
-import chalk from 'chalk';
+import log from './logs.js';
 import { getLanguageFlag } from './flagger.js';
 
 // Scraper() returns fetchProfile()
 export default async function scraper() {
 
     // Launch the browser and open
-    console.log('Launching a browser...')
+    log('Scraper', 'Launching a browser...', 'info')
     const browser = await puppeteer.launch({ headless: 'new' });
 
     async function fetchProfile(username, optimize) {
-        console.log(`Recievied a request for ${username}'s profile`)
         return new Promise(async (resolve, reject) => {
 
 
             // Open a new page
-            console.log('Opening a new page...')
             const page = await browser.newPage();
 
             // Optimizations
@@ -40,7 +38,6 @@ export default async function scraper() {
             // Navigate the page to a URL
             const rawDuolingoProfileUrl = `https://www.duolingo.com/profile/${username}`;
             const duolingoProfileUrl = encodeURI(rawDuolingoProfileUrl);
-            console.log(`Navigating to ${duolingoProfileUrl}...`)
             await page.goto(duolingoProfileUrl);
             if(page.url() === 'https://www.duolingo.com/errors/404.html') { 
                 reject({
@@ -52,7 +49,7 @@ export default async function scraper() {
                 const regex = /^https:\/\/www\.duolingo\.com\/\d{4}-\d{2}-\d{2}\/users\?username=/g
                 if (`${res.url()}`.match(regex)) {
 
-                    console.log(`${chalk.bgBlackBright(` 📨 Request found: `)} ${chalk.gray(res.url())}`)
+                    log('Request found', `${res.url()}`, 'success')
                     // const response = req.response()
                     const response = await res.json()
                     // Close the page

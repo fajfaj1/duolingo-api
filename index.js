@@ -1,6 +1,8 @@
 import Scraper from './scraper.js';
+import process from 'node:process';
 import express from 'express';
 import db from './db.js';
+import log from './logs.js';
 
 const app = express();
 const port = 3000;
@@ -17,6 +19,10 @@ const options = {
 }
 app.use(express.static('public', options))
 
+process.on('uncaughtException', (err, origin) => {
+    log('Uncaught Exception', `(${origin}) ${err}`, 'error')
+});
+
 const scraper = await Scraper()
 
 // Root route
@@ -24,7 +30,7 @@ app.get('/', (req, res) => {
     res.send(JSON.stringify({ message: 'Hello World!', availableRoutes: ['/profile/info?username', '/profile/screenshot'] }));
 });
 
-async function fetchProfile(username, optimize) {
+async function getProfile(username, optimize) {
     const profileData = await scraper.fetchProfile(username, optimize);    
 
     const response = {
@@ -39,6 +45,7 @@ async function fetchProfile(username, optimize) {
 app.get('/profile/info', async (req, res) => {
     const receiveTime = Date.now();
     const username = req.query.username
+    log('Request', `Received request for ${username} profile`, 'received')
 
     let response
     let cachedProfiles = await db.get('cachedProfiles')
@@ -50,15 +57,14 @@ app.get('/profile/info', async (req, res) => {
     const timeSince = Date.now() - cachedProfile.timestamp
 
     if(timeSince > 3.6e+6 || !cachedProfile.body) {
-
-        console.log(`Fetching profile... ${timeSince > 3.6e+6} ${!cachedProfile.body}`)
-        response = await fetchProfile(username, true);
+        log('Request', `Fetching ${username} profile`, 'wait')
+        response = await getProfile(username, true);
         cachedProfile[username] = response
         await db.set('cachedProfiles', cachedProfile)
 
     } else {
 
-        console.log('Using cached profile...')
+        log('Request', `Serving cached ${username} profile`, 'wait')
         response = cachedProfile
         
     }
@@ -74,7 +80,7 @@ app.get('/profile/screenshot', async (req, res) => {
 
 // Listen
 app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`);
+    log('API', `Listening on port ${port}`, 'info')
 })
 
 
