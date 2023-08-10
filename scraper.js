@@ -1,5 +1,6 @@
 import puppeteer from 'puppeteer';
 import chalk from 'chalk';
+import { getLanguageFlag } from './flagger.js';
 
 // Scraper() returns fetchProfile()
 export default async function scraper() {
@@ -41,7 +42,12 @@ export default async function scraper() {
             const duolingoProfileUrl = encodeURI(rawDuolingoProfileUrl);
             console.log(`Navigating to ${duolingoProfileUrl}...`)
             await page.goto(duolingoProfileUrl);
-
+            if(page.url() === 'https://www.duolingo.com/errors/404.html') { 
+                reject({
+                    status: 'error',
+                    message: 'User not found'
+                }) 
+            }
             page.on('response', async (res) => {
                 const regex = /^https:\/\/www\.duolingo\.com\/\d{4}-\d{2}-\d{2}\/users\?username=/g
                 if (`${res.url()}`.match(regex)) {
@@ -82,6 +88,17 @@ export default async function scraper() {
                 profile.courses = courses
 
                 profile.coursesCount = courses.length
+
+                const profileCourses = profile.courses
+                profileCourses.forEach(course => {
+                    
+                    const flag = getLanguageFlag(course.title)
+                    course.flag = flag
+
+                })
+                profile.courses = profileCourses
+
+                profile.status = 'success'
 
                 return profile
             }
