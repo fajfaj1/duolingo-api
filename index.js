@@ -86,3 +86,6 @@ app.listen(port, () => {
 
 // const userProfile = await fetchProfile('6hodii9');
     // console.log(await userProfile.getProfileData());
+
+// Export the Express API
+export default app;
