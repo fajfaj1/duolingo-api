@@ -1,3 +1,3 @@
 import { QuickDB } from 'quick.db'
-const db = new QuickDB({ filePath: './public/json.sqlite'})
+const db = new QuickDB()
 export default db
