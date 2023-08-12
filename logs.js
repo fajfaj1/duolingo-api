@@ -34,7 +34,29 @@ export default function log(title, message, type) {
             
     }
     
-    const text = template.replace('%TITLE%', tTitle).replace('%MESSAGE%', tMessage)
+    let text = template.replace('%TITLE%', tTitle).replace('%MESSAGE%', tMessage)
+    
+    const styling = {
+        bold: {
+            char: '\\*\\*',
+            styling: chalk.bold
+        },
+        italic: {
+            char: '\\*',
+            styling: chalk.italic
+        },
+        underline: {
+            char: '__',
+            styling: chalk.underline
+        }
+
+    }
+    Object.keys(styling).forEach(key => {
+        const style = styling[key]
+        const regex = new RegExp(`${style.char}.+${style.char}`, 'g')
+        text = text.replace(regex, style.styling('$&')).replace(new RegExp(style.char, 'g'), '')
+    })
+    // text = text.replace(/__.+__/, chalk.underline('$&').replace(/__/g, '')).replace(/__/g, '')
 
     console.log(text)
 

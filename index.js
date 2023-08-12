@@ -45,7 +45,7 @@ async function getProfile(username, optimize) {
 app.get('/profile/info', async (req, res) => {
     const receiveTime = Date.now();
     const username = req.query.username
-    log('New request', `Received request for ${username} profile from ${req.ip}`, 'received')
+    log('New request', `Received request for **${username}** profile from **${req.ip}**`, 'received')
 
     let response
     let cachedProfiles = await db.get('cachedProfiles')
@@ -56,21 +56,24 @@ app.get('/profile/info', async (req, res) => {
 
     const timeSince = Date.now() - cachedProfile.timestamp
 
+    let source
     if(timeSince > 3.6e+6 || !cachedProfile.body) {
 
         response = await getProfile(username, true);
         cachedProfile[username] = response
+        source = 'web'
         await db.set('cachedProfiles', cachedProfile)
 
     } else {
 
+        source = 'cache'
         response = cachedProfile
         
     }
-
     response.responseTime = `${Date.now() - receiveTime}ms`;  
-  
+    
     res.send(JSON.stringify(response));
+    log(`Request Resolved`, `Served **${username}**'s profile data from **${source}** in ${response.responseTime}`, 'success')
 })
 // Profile screenshot route
 app.get('/profile/screenshot', async (req, res) => {

@@ -21,15 +21,13 @@ export default async function scraper() {
                 await page.setRequestInterception(true);
                 page.on('request', (req) => {
 
-                    const blockedTypes = ['image', 'media']
+                    const blockedTypes = ['image', 'media', 'xhr', 'svg+xml', 'batch']
                     const isBlacklisted = blockedTypes.includes(req.resourceType());
                     const isBlocked = req.url().includes('analytics');
 
                     if (isBlacklisted || isBlocked) {
-                        // console.log(`${chalk.bgRed('  ✖  ')} ${req.resourceType()} — ${chalk.gray(req.url())} `)
                         req.abort();
                     } else {
-                        // console.log(`${chalk.bgGreen('  ✔  ')} ${req.resourceType()} — ${chalk.gray(req.url())}`)
                         req.continue();
                     }
                 });
@@ -38,21 +36,13 @@ export default async function scraper() {
             // Navigate the page to a URL
             const rawDuolingoProfileUrl = `https://www.duolingo.com/profile/${username}`;
             const duolingoProfileUrl = encodeURI(rawDuolingoProfileUrl);
-            page.goto(duolingoProfileUrl, { waitUntil: 'networkidle2' });
-            // log('Navigated', `Navigated to ${duolingoProfileUrl}`, 'success')
+            try {
+                page.goto(duolingoProfileUrl, { waitUntil: 'networkidle2' });
+            } catch {
+                log('Error', `Error while navigating.`, 'error')
+            }
             
-            // Check if the user exists
-            // page.on('request', (req) => {
-            //     if(req.url() === 'https://www.duolingo.com/errors/404.html') {
-            //         log('User not found', `User ${username} not found`, 'warn')
-            //         resolve({
-            //             status: 'error',
-            //             message: 'User not found'
-            //         }) 
-            //         page.close()
-            //     }
-            // })
-            
+
             // Wait for the good packet to steal
             page.on('response', async (res) => {
                 const regex = /^https:\/\/www\.duolingo\.com\/\d{4}-\d{2}-\d{2}\/users\?username=/g
@@ -61,12 +51,11 @@ export default async function scraper() {
                     log('Request found', `${res.url()}`, 'success')
                     // const response = req.response()
                     const response = await res.json()
-                    // Close the page
-                    page.close()
 
                     resolve(responseToData(response))
 
-
+                    // Close the page
+                    return await page.close()
 
                 }
 
