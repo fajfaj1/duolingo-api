@@ -2,7 +2,6 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "vercel-build": "echo 'Nothing to do here'"
   },
   "dependencies": {
     "better-sqlite3": "^8.5.0",
