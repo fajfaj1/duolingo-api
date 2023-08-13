@@ -3,9 +3,12 @@ import process from 'node:process';
 import express from 'express';
 import db from './db.js';
 import log from './logs.js';
+import https from 'https';
+import fs from 'fs';
 
 const app = express();
-const port = 3000;
+const port = 443;
+// const port = 400;
 
 // Set response headers
 const options = {
@@ -19,6 +22,8 @@ const options = {
 }
 app.use(express.static('public', options))
 
+app.use('/public', express.static('public'))
+
 process.on('uncaughtException', (err, origin) => {
     log('Uncaught Exception', `(${origin}) ${err}`, 'error')
 });
@@ -30,8 +35,8 @@ app.get('/', (req, res) => {
     res.send(JSON.stringify({ message: 'Hello World!', availableRoutes: ['/profile/info?username', '/profile/screenshot'] }));
 });
 
-async function getProfile(username, optimize) {
-    const profileData = await scraper.fetchProfile(username, optimize);    
+async function getProfile(username, optimize, hostname) {
+    const profileData = await scraper.fetchProfile(username, optimize, hostname);    
 
     const response = {
         timestamp: Date.now(),
@@ -59,7 +64,7 @@ app.get('/profile/info', async (req, res) => {
     let source
     if(timeSince > 3.6e+6 || !cachedProfile.body) {
 
-        response = await getProfile(username, true);
+        response = await getProfile(username, true, req.hostname);
         cachedProfile[username] = response
         source = 'web'
         await db.set('cachedProfiles', cachedProfile)
@@ -76,14 +81,27 @@ app.get('/profile/info', async (req, res) => {
     log(`Request Resolved`, `Served **${username}**'s profile data from **${source}** in ${response.responseTime}`, 'success')
 })
 // Profile screenshot route
-app.get('/profile/screenshot', async (req, res) => {
+// app.get('/profile/screenshot', async (req, res) => {
     
-})
+// })
 
-// Listen
-app.listen(port, () => {
+https.createServer(
+		// Provide the private and public key to the server by reading each
+		// file's content with the readFileSync() method.
+    {
+      key: fs.readFileSync("./ssl/key.pem"),
+      cert: fs.readFileSync("./ssl/cert.pem"),
+    },
+    app
+  )
+  .listen(port, () => {
     log('API', `Listening on port ${port}`, 'info')
-})
+  });
+
+// // Listen
+// app.listen(port, () => {
+//     log('API', `Listening on port ${port}`, 'info')
+// })
 
 
 

@@ -1,6 +1,7 @@
 import puppeteer from 'puppeteer';
 import log from './logs.js';
 import { getLanguageFlag } from './flagger.js';
+import download from './avatars.js';
 
 // Scraper() returns fetchProfile()
 export default async function scraper() {
@@ -9,7 +10,7 @@ export default async function scraper() {
     log('Scraper', 'Launching a browser...', 'info')
     const browser = await puppeteer.launch({ headless: 'new' });
 
-    async function fetchProfile(username, optimize) {
+    async function fetchProfile(username, optimize, hostname) {
         return new Promise(async (resolve, reject) => {
 
 
@@ -55,7 +56,7 @@ export default async function scraper() {
                     resolve(responseToData(response))
 
                     // Close the page
-                    return await page.close()
+                    return page.close()
 
                 }
 
@@ -69,15 +70,16 @@ export default async function scraper() {
                     }
                 }
                 const profile = response.users[0]
+                console.log(profile)
 
-                const props = ['name', 'totalXp', 'username', 'courses', 'streak', 'currentCourseId', 'createionDate', 'streakData', 'hasPlus']
+                const props = ['name', 'totalXp', 'username', 'courses', 'streak', 'currentCourseId', 'createionDate', 'streakData', 'hasPlus', 'picture']
                 Object.keys(profile).forEach((key, index) => {
                     if (!props.includes(key)) {
                         delete profile[key]
                     }
                 })
 
-                const courseProps = ['title', 'learningLanguage', 'xp', 'healthEnabled', 'fromLanguage', 'cornws', 'id']
+                const courseProps = ['title', 'learningLanguage', 'xp', 'healthEnabled', 'fromLanguage', 'crowns', 'id']
                 const courses = profile.courses
                 courses.forEach((course, index) => {
                     Object.keys(course).forEach((key, index) => {
@@ -100,6 +102,14 @@ export default async function scraper() {
                 profile.courses = profileCourses
 
                 profile.status = 'success'
+
+                const avatarUrl = 'https:' + profile.picture + '/xxlarge'
+                const fileName = username + '.png'
+                const filePath = hostname + `/public/avatars/${fileName}`
+
+                download(avatarUrl, fileName)
+
+                profile.picture = filePath
 
                 return profile
             }

@@ -2,3 +2,5 @@ json.sqlite
 node_modules
 legacy.js
 ssh
+ssl
+public/avatars
