@@ -7,7 +7,7 @@ import https from 'https';
 import fs from 'fs';
 
 const app = express();
-const port = 9162;
+const port = 443;
 // const port = 400;
 
 // Set response headers
