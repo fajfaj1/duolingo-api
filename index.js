@@ -1,7 +1,7 @@
 import Scraper from './scraper.js';
 import process from 'node:process';
 import express from 'express';
-import db from './modules/db.js';
+// import db from './modules/db.js';
 import log from './modules/logs.js';
 import https from 'https';
 import fs from 'fs';
@@ -28,6 +28,7 @@ process.on('uncaughtException', (err, origin) => {
     log('Uncaught Exception', `(${origin}) ${err}`, 'error')
 });
 
+const cache = {}
 const scraper = await Scraper()
 
 // Root route
@@ -53,7 +54,8 @@ app.get('/duolingo/profile/:username', async (req, res) => {
     log('New request', `Received request for **${username}** profile from **${req.ip}**`, 'received')
 
     let response
-    let cachedProfiles = await db.get('cachedProfiles')
+    // let cachedProfiles = await db.get('cachedProfiles')
+    let cachedProfiles = cache.profiles
     if(!cachedProfiles) cachedProfiles = {}
     let cachedProfile = cachedProfiles[username]
 
@@ -65,9 +67,9 @@ app.get('/duolingo/profile/:username', async (req, res) => {
     if(timeSince > 3.6e+6 || !cachedProfile.body) {
 
         response = await getProfile(username, true, req.hostname);
-        cachedProfile[username] = response
+        cachedProfiles[username] = response
         source = 'web'
-        await db.set('cachedProfiles', cachedProfile)
+        cache.profiles = cachedProfiles
 
     } else {
 
