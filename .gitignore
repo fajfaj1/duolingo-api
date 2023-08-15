@@ -3,4 +3,5 @@ node_modules
 legacy.js
 ssh
 ssl
+old_ssl
 public/avatars
