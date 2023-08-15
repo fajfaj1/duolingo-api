@@ -2,6 +2,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "start": "node index.js"
   },
   "dependencies": {
     "better-sqlite3": "^8.5.0",
