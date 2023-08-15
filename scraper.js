@@ -12,13 +12,14 @@ export default async function scraper() {
 
     async function fetchProfile(username, optimize, hostname) {
         return new Promise(async (resolve, reject) => {
-
+            let isResolved = false
 
             // Open a new page
             const page = await browser.newPage();
 
             // Optimizations
             if (optimize !== false) {
+                if (isResolved) return
                 await page.setRequestInterception(true);
                 page.on('request', (req) => {
 
@@ -33,34 +34,49 @@ export default async function scraper() {
                     }
                 });
             }
-            
 
-            // Wait for the good packet to steal
+
+            // Wait for the good packets to steal
+            const bodies = []
             page.on('response', async (res) => {
-                const regex = /^https:\/\/www\.duolingo\.com\/\d{4}-\d{2}-\d{2}\/users\?username=/g
-                if (`${res.url()}`.match(regex)) {
+                if (isResolved) return
 
-                    log('Request found', `${res.url()}`, 'success')
-                    // const response = req.response()
-                    const response = await res.json()
+                if (res.url() == 'https://www.duolingo.com/errors/404.html') {
+                    resolve({
+                        status: 'error',
+                        message: 'User not found'
+                    })
+                    isResolved = true
+                    return
+                }
 
+                // Expression for both
+                const regex = /^https:\/\/www\.duolingo\.com\/\d{4}-\d{2}-\d{2}\/users\?username=|^https:\/\/duolingo-leaderboards-prod\.duolingo\.com\/leaderboards\/.+\/users/
+                const url = res.url()
+                const request = res.request()
+                if (url.match(regex) && request.resourceType() === 'fetch') {
+
+                    bodies.push(await res.json())
+
+                }
+
+
+                if (bodies.length == 2) {
+                    const response = {
+                        ...bodies[0].users[0],
+                        ...bodies[1]
+                    }
+                    log('Response', '')
+                    console.log(response)
                     resolve(responseToData(response))
-
-
                 }
 
             })
 
-            function responseToData(response) {
-                if(response.users.length === 0) {
-                    return {
-                        status: 'error',
-                        message: 'User not found'
-                    }
-                }
-                const profile = response.users[0]
+            function responseToData(profile) {
 
-                const props = ['name', 'totalXp', 'username', 'courses', 'streak', 'currentCourseId', 'createionDate', 'streakData', 'hasPlus', 'picture', 'id']
+                const props = ['name', 'totalXp', 'username', 'courses', 'streak', 'currentCourseId', 'createionDate', 'streakData'
+                    , 'hasPlus', 'picture', 'id', 'tier', 'streak_in_tier', 'top_three_finishes']
                 Object.keys(profile).forEach((key, index) => {
                     if (!props.includes(key)) {
                         delete profile[key]
@@ -82,7 +98,7 @@ export default async function scraper() {
 
                 const profileCourses = profile.courses
                 profileCourses.forEach(course => {
-                    
+
                     const flag = getLanguageFlag(course.title)
                     course.flag = flag
 
@@ -92,16 +108,16 @@ export default async function scraper() {
                 profile.status = 'success'
 
                 const avatarUrl = 'https:' + profile.picture + '/xxlarge'
-                
+
                 let filePath = 'null'
 
-                if(avatarUrl != 'https://simg-ssl.duolingo.com/avatar/default_2/xxlarge') {
+                if (avatarUrl != 'https://simg-ssl.duolingo.com/avatar/default_2/xxlarge') {
                     const fileName = username + '.png'
                     filePath = hostname + `/public/avatars/${fileName}`
                     download(avatarUrl, fileName)
                 } else {
                     let firstLetter = 'null'
-                    if(profile.name != null) {
+                    if (profile.name != null) {
                         firstLetter = profile.name.charAt(0)
                     } else {
                         firstLetter = profile.username.charAt(0)
@@ -112,7 +128,7 @@ export default async function scraper() {
                     log('First letter', `First letter is ${firstLetter}`, 'info')
                     generate(firstLetter, browser)
                 }
-                
+
 
                 profile.picture = filePath
 
@@ -124,7 +140,7 @@ export default async function scraper() {
             const duolingoProfileUrl = encodeURI(rawDuolingoProfileUrl);
             try {
                 await page.goto(duolingoProfileUrl, { waitUntil: 'networkidle2' });
-                page.close()
+                // page.close()
             } catch {
                 log('Error', `Error while navigating.`, 'error')
             }
