@@ -32,7 +32,7 @@ const scraper = await Scraper()
 
 // Root route
 app.get('/', (req, res) => {
-    res.send(JSON.stringify({ message: 'Hello World!', availableRoutes: ['/profile/info?username', '/profile/screenshot'] }));
+    res.send(JSON.stringify({ message: 'Hello World!', availableRoutes: ['/duolingo/profile/[USERNAME]'] }));
 });
 
 async function getProfile(username, optimize, hostname) {
@@ -47,9 +47,9 @@ async function getProfile(username, optimize, hostname) {
 }
 
 // Profile route
-app.get('/profile/info', async (req, res) => {
+app.get('/duolingo/profile/:username', async (req, res) => {
     const receiveTime = Date.now();
-    const username = req.query.username
+    const username = req.params.username
     log('New request', `Received request for **${username}** profile from **${req.ip}**`, 'received')
 
     let response

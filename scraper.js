@@ -45,7 +45,7 @@ export default async function scraper() {
             
 
             // Wait for the good packet to steal
-            page.on('response', async (res) => {
+            return page.on('response', async (res) => {
                 const regex = /^https:\/\/www\.duolingo\.com\/\d{4}-\d{2}-\d{2}\/users\?username=/g
                 if (`${res.url()}`.match(regex)) {
 
@@ -70,9 +70,8 @@ export default async function scraper() {
                     }
                 }
                 const profile = response.users[0]
-                console.log(profile)
 
-                const props = ['name', 'totalXp', 'username', 'courses', 'streak', 'currentCourseId', 'createionDate', 'streakData', 'hasPlus', 'picture']
+                const props = ['name', 'totalXp', 'username', 'courses', 'streak', 'currentCourseId', 'createionDate', 'streakData', 'hasPlus', 'picture', 'id']
                 Object.keys(profile).forEach((key, index) => {
                     if (!props.includes(key)) {
                         delete profile[key]
