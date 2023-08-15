@@ -7,7 +7,7 @@ import https from 'https';
 import fs from 'fs';
 
 const app = express();
-const port = 3000;
+const port = 443;
 // const port = 400;
 
 // Set response headers
@@ -96,7 +96,7 @@ https.createServer(
   )
   .listen(port, () => {
     log('API', `Listening on port ${port}`, 'info')
-  });
+});
 
 // // Listen
 // app.listen(port, () => {
