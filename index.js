@@ -1,8 +1,8 @@
 import Scraper from './scraper.js';
 import process from 'node:process';
 import express from 'express';
-import db from './db.js';
-import log from './logs.js';
+import db from './modules/db.js';
+import log from './modules/logs.js';
 import https from 'https';
 import fs from 'fs';
 
@@ -24,9 +24,9 @@ app.use(express.static('public', options))
 
 app.use('/public', express.static('public'))
 
-process.on('uncaughtException', (err, origin) => {
-    log('Uncaught Exception', `(${origin}) ${err}`, 'error')
-});
+// process.on('uncaughtException', (err, origin) => {
+//     log('Uncaught Exception', `(${origin}) ${err}`, 'error')
+// });
 
 const scraper = await Scraper()
 

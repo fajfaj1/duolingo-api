@@ -1,7 +1,7 @@
 import puppeteer from 'puppeteer';
-import log from './logs.js';
-import { getLanguageFlag } from './flagger.js';
-import download from './avatars.js';
+import log from './modules/logs.js';
+import { getLanguageFlag } from './modules/flagger.js';
+import { download, generate } from './modules/avatars.js';
 
 // Scraper() returns fetchProfile()
 export default async function scraper() {
@@ -33,19 +33,10 @@ export default async function scraper() {
                     }
                 });
             }
-
-            // Navigate the page to a URL
-            const rawDuolingoProfileUrl = `https://www.duolingo.com/profile/${username}`;
-            const duolingoProfileUrl = encodeURI(rawDuolingoProfileUrl);
-            try {
-                page.goto(duolingoProfileUrl, { waitUntil: 'networkidle2' });
-            } catch {
-                log('Error', `Error while navigating.`, 'error')
-            }
             
 
             // Wait for the good packet to steal
-            return page.on('response', async (res) => {
+            page.on('response', async (res) => {
                 const regex = /^https:\/\/www\.duolingo\.com\/\d{4}-\d{2}-\d{2}\/users\?username=/g
                 if (`${res.url()}`.match(regex)) {
 
@@ -55,8 +46,6 @@ export default async function scraper() {
 
                     resolve(responseToData(response))
 
-                    // Close the page
-                    return page.close()
 
                 }
 
@@ -103,16 +92,42 @@ export default async function scraper() {
                 profile.status = 'success'
 
                 const avatarUrl = 'https:' + profile.picture + '/xxlarge'
-                const fileName = username + '.png'
-                const filePath = hostname + `/public/avatars/${fileName}`
+                
+                let filePath = 'null'
 
-                download(avatarUrl, fileName)
+                if(avatarUrl != 'https://simg-ssl.duolingo.com/avatar/default_2/xxlarge') {
+                    const fileName = username + '.png'
+                    filePath = hostname + `/public/avatars/${fileName}`
+                    download(avatarUrl, fileName)
+                } else {
+                    let firstLetter = 'null'
+                    if(profile.name != null) {
+                        firstLetter = profile.name.charAt(0)
+                    } else {
+                        firstLetter = profile.username.charAt(0)
+                    }
+                    const fileName = firstLetter + '.png'
+                    filePath = hostname + `/public/avatars/default/${fileName}`
+
+                    log('First letter', `First letter is ${firstLetter}`, 'info')
+                    generate(firstLetter, browser)
+                }
+                
 
                 profile.picture = filePath
 
                 return profile
             }
 
+            // Navigate the page to a URL
+            const rawDuolingoProfileUrl = `https://www.duolingo.com/profile/${username}`;
+            const duolingoProfileUrl = encodeURI(rawDuolingoProfileUrl);
+            try {
+                await page.goto(duolingoProfileUrl, { waitUntil: 'networkidle2' });
+                page.close()
+            } catch {
+                log('Error', `Error while navigating.`, 'error')
+            }
 
         })
     };
