@@ -6,7 +6,7 @@ let ref = {
     German: '🇩🇪'  ,
     Hindi: '🇮🇳'  ,
     Italian: '🇮🇹'  ,
-    'Chinese (Simplified)': '🇨🇳'  ,
+    Chinese: '🇨🇳'  ,
     Russian: '🇷🇺'  ,
     Arabic: '🇦🇪'  ,
     English: '🇺🇸'  ,
