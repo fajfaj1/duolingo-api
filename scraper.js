@@ -141,7 +141,7 @@ export default async function scraper() {
             const duolingoProfileUrl = encodeURI(rawDuolingoProfileUrl);
             try {
                 await page.goto(duolingoProfileUrl, { waitUntil: 'networkidle2' });
-                // page.close()
+                page.close()
             } catch {
                 log('Error', `Error while navigating.`, 'error')
             }
