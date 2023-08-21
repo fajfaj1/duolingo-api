@@ -112,10 +112,12 @@ export default async function scraper() {
                 let filePath = 'null'
 
                 if (avatarUrl != 'https://simg-ssl.duolingo.com/avatar/default_2/xxlarge') {
+                    console.log('Download')
                     const fileName = username + '.png'
                     filePath = hostname + `/public/avatars/${fileName}`
                     download(avatarUrl, fileName)
                 } else {
+                    console.log('Generate')
                     let firstLetter = 'null'
                     if (profile.name != null) {
                         firstLetter = profile.name.charAt(0)

@@ -23,6 +23,10 @@ export function download(url, fileName) {
 }
 
 export async function generate(firstLetter, browser) {
+
+    // Ensure the dir exists
+    if(!dirExists('/default')) { mkDir('/default') }
+
     const avatarPath = filePath.replace('#FILENAME#', `default/${firstLetter}.png`)
     if(fs.existsSync(avatarPath)) { return }
     const page = await browser.newPage();
@@ -45,9 +49,11 @@ export async function generate(firstLetter, browser) {
 // const exampleAvatar = "https://simg-ssl.duolingo.com/avatars/263048714/2zmZKrtmkR/xxlarge"
 // download(exampleAvatar, 'fajfaj.png')
 
-function dirExists() {
-    return fs.existsSync(filePath.replace('/#FILENAME#', ''))
+function dirExists(dir) {
+    dir = dir || ''
+    return fs.existsSync(filePath.replace('/#FILENAME#', dir))
 }
-function mkDir() {
-    fs.mkdirSync(filePath.replace('/#FILENAME#', ''))
+function mkDir(dir) {
+    dir = dir || ''
+    fs.mkdirSync(filePath.replace('/#FILENAME#', dir))
 }
