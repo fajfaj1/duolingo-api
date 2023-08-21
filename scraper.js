@@ -51,7 +51,7 @@ export default async function scraper() {
                 }
 
                 // Expression for both
-                const regex = /^https:\/\/www\.duolingo\.com\/\d{4}-\d{2}-\d{2}\/users\?username=|^https:\/\/duolingo-leaderboards-prod\.duolingo\.com\/leaderboards\/.+\/users/
+                const regex = /^https:\/\/www\.duolingo\.com\/\d{4}-\d{2}-\d{2}\/users\?username=|^https:\/\/duolingo-leaderboards-prod\.duolingo\.com\/leaderboards\/.+\/users|^https:\/\/www\.duolingo\.com\/\d{4}-\d{2}-\d{2}\/users\/\d+\/xp_summaries/
                 const url = res.url()
                 const request = res.request()
                 if (url.match(regex) && request.resourceType() === 'fetch') {
