@@ -55,7 +55,7 @@ async function getProfile(username, optimize, hostname) {
     }
     // Save response time
     saveResponseTime(Date.now() - startTimestamp)
-    
+
     return response
 }
 // Get the profile from the cache
@@ -93,7 +93,10 @@ app.get('/duolingo/profile/:username', async (req, res) => {
         // If in cache
         source = 'cache'
         // Serve from cache
-        response = cachedProfile
+        response = {
+            timestamp: Date.now(),
+            body: cachedProfile
+        }
         
     }
     // Calc response time
