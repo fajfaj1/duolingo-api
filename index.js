@@ -133,7 +133,7 @@ app.get('/duolingo/cache/:username', async (req, res) => {
         code = 1
     } 
 
-    res.send(JSON.stringify({message: message, username: username, responseUrl: `https://${req.hostname}/profile/${username}`, estimatedTime: estimatedTime, code: code}))
+    res.send(JSON.stringify({message: message, username: username, responseUrl: `https://${req.hostname}/duolingo/profile/${username}`, estimatedTime: estimatedTime, code: code}))
     
 })
 

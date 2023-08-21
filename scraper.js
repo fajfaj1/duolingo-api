@@ -61,19 +61,19 @@ export default async function scraper() {
                 }
 
 
-                if (bodies.length == 2) {
+                if (bodies.length == 3) {
                     const response = {
                         ...bodies[0].users[0],
-                        ...bodies[1]
+                        ...bodies[1],
+                        ...bodies[2]
                     }
-                    log('Response', '')
-                    console.log(response)
                     resolve(responseToData(response))
                 }
 
             })
 
             function responseToData(profile) {
+                console.log(profile)
 
                 const props = ['name', 'totalXp', 'username', 'courses', 'streak', 'currentCourseId', 'createionDate', 'streakData'
                     , 'hasPlus', 'picture', 'id', 'tier', 'streak_in_tier', 'top_three_finishes']
