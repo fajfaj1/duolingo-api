@@ -38,7 +38,7 @@ const scraper = await Scraper()
 
 // Root route
 app.get('/', (req, res) => {
-    res.send(JSON.stringify({ message: 'Hello World!', availableRoutes: ['/duolingo/profile/[USERNAME]'] }));
+    res.send(JSON.stringify({ message: 'Hello World!', availableRoutes: ['/duolingo/profile/[USERNAME]', '/duolingo/cache/[USERNAME]'] }));
 });
 
 // Get the proifle from the web
