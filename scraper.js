@@ -3,6 +3,7 @@ import log from './modules/logs.js';
 import { getLanguageFlag } from './modules/flagger.js';
 import { download, generate } from './modules/avatars.js';
 
+const imgSize = 'xlarge'
 // Scraper() returns fetchProfile()
 export default async function scraper() {
 
@@ -107,17 +108,15 @@ export default async function scraper() {
 
                 profile.status = 'success'
 
-                const avatarUrl = 'https:' + profile.picture + '/xxlarge'
+                const avatarUrl = 'https:' + profile.picture + `/${imgSize}`
 
                 let filePath = 'null'
 
-                if (avatarUrl != 'https://simg-ssl.duolingo.com/avatar/default_2/xxlarge') {
-                    console.log('Download')
+                if (avatarUrl != `https://simg-ssl.duolingo.com/avatar/default_2/${imgSize}`) {
                     const fileName = username + '.png'
-                    filePath = hostname + `/public/avatars/${fileName}`
+                    filePath = `/public/avatars/${fileName}`
                     download(avatarUrl, fileName)
                 } else {
-                    console.log('Generate')
                     let firstLetter = 'null'
                     if (profile.name != null) {
                         firstLetter = profile.name.charAt(0)
@@ -125,14 +124,14 @@ export default async function scraper() {
                         firstLetter = profile.username.charAt(0)
                     }
                     const fileName = firstLetter + '.png'
-                    filePath = hostname + `/public/avatars/default/${fileName}`
+                    filePath = `/public/avatars/default/${fileName}`
 
                     log('First letter', `First letter is ${firstLetter}`, 'info')
                     generate(firstLetter, browser)
                 }
 
 
-                profile.picture = filePath
+                profile.picture = `https://${hostname}${filePath}`
 
                 return profile
             }
