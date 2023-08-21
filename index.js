@@ -43,13 +43,19 @@ app.get('/', (req, res) => {
 
 // Get the proifle from the web
 async function getProfile(username, optimize, hostname) {
+    const startTimestamp = Date.now()
+    // Fetch the profile
     const profileData = await scraper.fetchProfile(username, optimize, hostname);    
+    // Save to cache
+    cache.profiles[username] = profileData
 
     const response = {
         timestamp: Date.now(),
         body: profileData
     }
-
+    // Save response time
+    saveResponseTime(Date.now() - startTimestamp)
+    
     return response
 }
 // Get the profile from the cache
@@ -81,10 +87,8 @@ app.get('/duolingo/profile/:username', async (req, res) => {
     if(!cachedProfile) {
         // If not in recent cache
         source = 'web'
-        // Get the profile from web
+        // Serve the profile from web
         response = await getProfile(username, true, req.hostname);
-        // Add to cache
-        cache.profiles[username] = response
     } else {
         // If in cache
         source = 'cache'
@@ -95,7 +99,6 @@ app.get('/duolingo/profile/:username', async (req, res) => {
     // Calc response time
     const responseTime = Date.now() - receiveTime
     response.responseTime = `${responseTime}ms`; // Include ms in response 
-    saveResponseTime(responseTime) // Save response time to cache
 
     // Send response
     res.send(JSON.stringify(response));
