@@ -31,7 +31,8 @@ export async function generate(firstLetter, browser) {
     if(fs.existsSync(avatarPath)) { return }
     const page = await browser.newPage();
 
-    const schemePath = path.resolve('schemes\\avatar.html');
+    const schemePath = 'file:/' + path.resolve('schemes', 'avatar.html');
+    console.log(schemePath)
     await page.goto(schemePath)
 
     const avatar = await page.waitForSelector('#avatar');
