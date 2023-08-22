@@ -9,7 +9,9 @@ import fs from 'fs';
 const app = express();
 const port = 443;
 
-const cacheTime = 3.6e+6 // 1 hour
+// const cacheTime = 3.6e+6 // 1 hour
+const cacheTime = 10*60000
+
 // const port = 400;
 
 // Set response headers
@@ -46,13 +48,15 @@ async function getProfile(username, optimize, hostname) {
     const startTimestamp = Date.now()
     // Fetch the profile
     const profileData = await scraper.fetchProfile(username, optimize, hostname);    
-    // Save to cache
-    cache.profiles[username] = profileData
 
     const response = {
         timestamp: Date.now(),
         body: profileData
     }
+
+    // Save to cache
+    cache.profiles[username] = response
+
     // Save response time
     saveResponseTime(Date.now() - startTimestamp)
 
@@ -93,10 +97,7 @@ app.get('/duolingo/profile/:username', async (req, res) => {
         // If in cache
         source = 'cache'
         // Serve from cache
-        response = {
-            timestamp: Date.now(),
-            body: cachedProfile
-        }
+        response = cachedProfile
         
     }
     // Calc response time
