@@ -75,6 +75,7 @@ export default async function scraper() {
             })
 
             function responseToData(profile) {
+                console.log(profile)
                 // Objective: Parse the response to a clean object (return it)
                 const template = {
                     name: "name",
@@ -87,6 +88,11 @@ export default async function scraper() {
                         id: "id",
                         hasPlus: "hasPlus",
                         picture: "picture",
+                    },
+                    streak: {
+                        start: "streakData.currentStreak.startDate",
+                        length: "streakData.currentStreak.length",
+                        end: "streakData.currentStreak.endDate"
                     },
                     leaderboard: {
                         league: "tier",
@@ -244,7 +250,20 @@ export default async function scraper() {
                 }
 
                 profile.user.picture = getAvatarUrl(profile)
+                
+                const streakEnd = profile.streak.end || 'null'
 
+                const today = new Date()
+
+                const year = today.getUTCFullYear()
+                let month = today.getUTCMonth()
+                month = month + 1
+                month = month.toString().padStart(2, '0')
+                const day = today.getUTCDate()
+
+                const todayFormat = `${year}-${month}-${day}`
+                profile.streak.extendedToday = streakEnd === todayFormat
+                
                 return profile
             }
 
