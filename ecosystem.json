@@ -3,7 +3,8 @@
     {
       "name": "duolingo-api",
       "script": "./index.js",
-      "watch": true
+      "watch": true,
+      "ignore_watch": ["node_modules", "public"]
     }
   ]
 }
