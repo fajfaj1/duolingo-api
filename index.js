@@ -3,11 +3,9 @@ import process from 'node:process';
 import express from 'express';
 // import db from './modules/db.js';
 import log from './modules/logs.js';
-import https from 'https';
-import fs from 'fs';
+
 
 const app = express();
-const port = 443;
 
 // const cacheTime = 3.6e+6 // 1 hour
 const cacheTime = 10*60000
@@ -40,7 +38,7 @@ const scraper = await Scraper()
 
 // Root route
 app.get('/', (req, res) => {
-    res.send(JSON.stringify({ message: 'Hello World!', availableRoutes: ['/duolingo/profile/[USERNAME]', '/duolingo/cache/[USERNAME]'] }));
+    res.send(JSON.stringify({ message: 'Hello World!', availableRoutes: ['/profile/[USERNAME]', '/cache/[USERNAME]'] }));
 });
 
 // Get the proifle from the web
@@ -79,7 +77,7 @@ function saveResponseTime(time) {
     if(cache.responseTimes.length > 10) cache.responseTimes.shift()
 }
 // Profile route
-app.get('/duolingo/profile/:username', async (req, res) => {
+app.get('/profile/:username', async (req, res) => {
     const receiveTime = Date.now();
     const username = req.params.username
     log('New request', `Received request for **${username}** profile from **${req.ip}**`, 'received')
@@ -110,7 +108,7 @@ app.get('/duolingo/profile/:username', async (req, res) => {
 })
 
 // Request user cache
-app.get('/duolingo/cache/:username', async (req, res) => {
+app.get('/cache/:username', async (req, res) => {
     const username = req.params.username
     log('New request', `Received request to cache ${username}'s profile`, 'received')
 
@@ -138,28 +136,4 @@ app.get('/duolingo/cache/:username', async (req, res) => {
     
 })
 
-https.createServer(
-		// Provide the private and public key to the server by reading each
-		// file's content with the readFileSync() method.
-    {
-      key: fs.readFileSync("./ssl/privkey.pem"),
-      cert: fs.readFileSync("./ssl/fullchain.pem"),
-    },
-    app
-  )
-  .listen(port, () => {
-    log('API', `Listening on port ${port}`, 'info')
-});
-
-// // Listen
-// app.listen(port, () => {
-//     log('API', `Listening on port ${port}`, 'info')
-// })
-
-
-
-// const userProfile = await fetchProfile('6hodii9');
-    // console.log(await userProfile.getProfileData());
-
-// Export the Express API
 export default app;
