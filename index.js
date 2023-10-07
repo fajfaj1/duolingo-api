@@ -26,9 +26,9 @@ app.use(express.static('public', options))
 
 app.use('/public', express.static('public'))
 
-process.on('uncaughtException', (err, origin) => {
-    log('Uncaught Exception', `(${origin}) ${err}`, 'error')
-});
+// process.on('uncaughtException', (err, origin) => {
+//     log('Uncaught Exception', `(${origin}) ${err}`, 'error')
+// });
 
 const cache = {}
 cache.profiles = {}
