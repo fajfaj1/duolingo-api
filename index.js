@@ -3,7 +3,11 @@ import process from 'node:process';
 import express from 'express';
 // import db from './modules/db.js';
 import log from './modules/logs.js';
+import fs from 'node:fs';
 
+let route = JSON.parse(fs.readFileSync('./routes.json')).duolingo.split('/')
+void route.pop()
+route = route.join('/')
 
 const app = express();
 
@@ -24,7 +28,7 @@ const options = {
 }
 app.use(express.static('public', options))
 
-app.use('/public', express.static('public'))
+app.use('/public', express.static(route + '/public'))
 
 // process.on('uncaughtException', (err, origin) => {
 //     log('Uncaught Exception', `(${origin}) ${err}`, 'error')

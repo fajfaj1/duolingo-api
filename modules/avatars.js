@@ -1,8 +1,12 @@
 import fs from 'fs';
 import fetch from 'node-fetch';
 import path from 'node:path';
-const filePath = `./public/avatars/#FILENAME#`
 
+let route = JSON.parse(fs.readFileSync('./routes.json')).duolingo.split('/')
+void route.pop()
+route = route.join('/')
+
+const filePath = route + `/public/avatars/#FILENAME#`
 
 export function download(url, fileName) {
     // Ensure the dir exists
@@ -31,7 +35,7 @@ export async function generate(firstLetter, browser) {
     if(fs.existsSync(avatarPath)) { return }
     const page = await browser.newPage();
 
-    const schemePath = 'file:/' + path.resolve('schemes/avatar', 'avatar.html');
+    const schemePath = 'file:/' + path.resolve(route + '/schemes/avatar', 'avatar.html');
     await page.goto(schemePath)
 
     const avatar = await page.waitForSelector('#avatar');
